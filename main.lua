@@ -1,12 +1,13 @@
 --[[
-    Anti-AFK بدون ضغط أي زر (يعتمد على حركة الماوس فقط)
-    واجهة GUI سوداء → أحمر غامق، ونص أبيض نيون
+    Anti-AFK + FPS + Ping متحرك + عداد + واجهة قابلة للسحب
+    منع الطرد عبر حركة ماوس خفيفة كل 10 دقائق (بدون كبسة زر)
 ]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Stats = game:GetService("Stats")
 local VirtualInput = game:GetService("VirtualInputManager")
+local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
 -- إنشاء GUI
@@ -14,19 +15,21 @@ local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 screenGui.ResetOnSpawn = false
 
+-- الإطار الرئيسي (قابل للسحب)
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 220, 0, 130)
-mainFrame.Position = UDim2.new(0.5, -110, 0.5, -65)
+mainFrame.Position = UDim2.new(0.5, -110, 0.5, -65) -- توسيط
 mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 mainFrame.BackgroundTransparency = 0.6
 mainFrame.BorderSizePixel = 0
 mainFrame.Parent = screenGui
 
+-- زوايا مدورة
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 8)
 corner.Parent = mainFrame
 
--- عناوين
+-- عناوين FPS و Ping والعداد
 local fpsLabel = Instance.new("TextLabel")
 fpsLabel.Size = UDim2.new(1, 0, 0, 30)
 fpsLabel.Position = UDim2.new(0, 0, 0, 5)
@@ -63,12 +66,42 @@ timerLabel.TextStrokeTransparency = 0.5
 timerLabel.TextStrokeColor3 = Color3.fromRGB(150, 200, 255)
 timerLabel.Parent = mainFrame
 
--- متغيرات FPS
+-- ===== كود السحب (Draggable) =====
+local dragging = false
+local dragStartPos = nil
+local frameStartPos = nil
+
+mainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStartPos = input.Position
+        frameStartPos = mainFrame.Position
+    end
+end)
+
+mainFrame.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStartPos
+        mainFrame.Position = UDim2.new(
+            frameStartPos.X.Scale,
+            frameStartPos.X.Offset + delta.X,
+            frameStartPos.Y.Scale,
+            frameStartPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- ===== متغيرات FPS والعداد =====
 local frameCount = 0
 local lastTime = os.clock()
 local fps = 0
 
--- متغيرات العداد
 local startTime = os.clock()
 local timerRunning = true
 
@@ -81,15 +114,14 @@ local function updateTimer()
     timerLabel.Text = string.format("%02d:%02d:%02d", hours, minutes, seconds)
 end
 
--- دالة منع الطرد (حركة ماوس بسيطة جداً، بدون ضغط زر)
+-- ===== منع الطرد (حركة ماوس فقط، بدون أزرار) =====
 local function preventAFK()
-    -- تحريك الماوس 1 بيكسل يميناً ثم إعادته (لا يظهر تأثير على الشاشة)
     VirtualInput:SendMouseMovement(1, 0, false)
     task.wait(0.05)
     VirtualInput:SendMouseMovement(-1, 0, false)
 end
 
--- حلقة كل 10 دقائق (أقل من حد الطرد 20 دقيقة)
+-- حلقة كل 10 دقائق
 coroutine.wrap(function()
     while true do
         task.wait(600) -- 10 دقائق
@@ -101,9 +133,9 @@ coroutine.wrap(function()
     end
 end)()
 
--- تحديث القيم كل إطار
+-- ===== التحديث المستمر =====
 RunService.Heartbeat:Connect(function(deltaTime)
-    -- FPS
+    -- 1. تحديث FPS
     frameCount = frameCount + 1
     local currentTime = os.clock()
     if currentTime - lastTime >= 1 then
@@ -113,16 +145,16 @@ RunService.Heartbeat:Connect(function(deltaTime)
         fpsLabel.Text = "FPS: " .. fps
     end
 
-    -- Ping
-    local ping = Stats:GetPing() or 0
-    pingLabel.Text = "Ping: " .. math.floor(ping * 1000) .. "ms"
+    -- 2. تحديث Ping (طريقة صحيحة ومتحركة)
+    local ping = Stats.Network.ServerStatsItem["Data Ping"]:GetValue() -- قيمة مباشرة بالميلي ثانية
+    pingLabel.Text = "Ping: " .. math.floor(ping) .. "ms"
 
-    -- تحديث العداد
+    -- 3. تحديث العداد
     updateTimer()
 
-    -- تحول الخلفية للأحمر الداكن تدريجياً
+    -- 4. تأثير تحول الخلفية لأحمر غامق تدريجياً
     local elapsed = os.clock() - startTime
-    local intensity = math.min(elapsed / 60, 1)
+    local intensity = math.min(elapsed / 60, 1) -- يصل للاحمر بعد دقيقة
     local red = math.floor(30 + intensity * 70)
     local green = math.floor(10 - intensity * 8)
     local blue = math.floor(10 - intensity * 8)
@@ -142,4 +174,4 @@ game:GetService("Players").PlayerRemoving:Connect(function(player)
     end
 end)
 
-print("Anti-AFK (mouse movement only) loaded - no key presses!")
+print("Anti-AFK loaded! (Ping now updates, GUI is draggable)")
