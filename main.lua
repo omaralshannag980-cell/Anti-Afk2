@@ -1,177 +1,145 @@
 --[[
-    سكربت واجهة GUI متحركة:
-    - خلفية متدرجة من الأسود إلى الأحمر (تتحرك باستمرار)
-    - عرض FPS حي
-    - عرض البنغ (Ping) حي
-    - عرض الوقت المنقضي (يبدأ من 0)
-    - حماية من الطرد Anti-AFK
-    - قابل للسحب على الجوال
-]]--
+    Anti-AFK بدون ضغط أي زر (يعتمد على حركة الماوس فقط)
+    واجهة GUI سوداء → أحمر غامق، ونص أبيض نيون
+]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
+local Stats = game:GetService("Stats")
+local VirtualInput = game:GetService("VirtualInputManager")
 local LocalPlayer = Players.LocalPlayer
-local VirtualUser = game:GetService("VirtualUser")
 
--- إنشاء الواجهة
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-ScreenGui.ResetOnSpawn = false
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+-- إنشاء GUI
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+screenGui.ResetOnSpawn = false
 
--- الإطار الرئيسي
-local Frame = Instance.new("Frame")
-Frame.Parent = ScreenGui
-Frame.Size = UDim2.new(0, 180, 0, 110)
-Frame.Position = UDim2.new(0.7, 0, 0.1, 0)
-Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-Frame.BorderSizePixel = 0
-Frame.Active = true
-Frame.ClipsDescendants = true
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 220, 0, 130)
+mainFrame.Position = UDim2.new(0.5, -110, 0.5, -65)
+mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+mainFrame.BackgroundTransparency = 0.6
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = screenGui
 
--- التدرج اللوني
-local Gradient = Instance.new("UIGradient")
-Gradient.Parent = Frame
-Gradient.Rotation = 90
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 8)
+corner.Parent = mainFrame
 
--- زوايا دائرية
-local Corner = Instance.new("UICorner")
-Corner.Parent = Frame
-Corner.CornerRadius = UDim.new(0, 8)
+-- عناوين
+local fpsLabel = Instance.new("TextLabel")
+fpsLabel.Size = UDim2.new(1, 0, 0, 30)
+fpsLabel.Position = UDim2.new(0, 0, 0, 5)
+fpsLabel.BackgroundTransparency = 1
+fpsLabel.Text = "FPS: 0"
+fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+fpsLabel.TextScaled = true
+fpsLabel.Font = Enum.Font.GothamBold
+fpsLabel.TextStrokeTransparency = 0.5
+fpsLabel.TextStrokeColor3 = Color3.fromRGB(150, 200, 255)
+fpsLabel.Parent = mainFrame
 
--- عناصر النص
-local FPS_Label = Instance.new("TextLabel")
-FPS_Label.Parent = Frame
-FPS_Label.Size = UDim2.new(1, 0, 0, 30)
-FPS_Label.Position = UDim2.new(0, 0, 0, 5)
-FPS_Label.BackgroundTransparency = 1
-FPS_Label.Font = Enum.Font.GothamBold
-FPS_Label.TextSize = 22
-FPS_Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-FPS_Label.TextStrokeTransparency = 0
-FPS_Label.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
-FPS_Label.TextStroke = 1
-FPS_Label.Text = "FPS: 0"
+local pingLabel = Instance.new("TextLabel")
+pingLabel.Size = UDim2.new(1, 0, 0, 30)
+pingLabel.Position = UDim2.new(0, 0, 0, 40)
+pingLabel.BackgroundTransparency = 1
+pingLabel.Text = "Ping: 0ms"
+pingLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+pingLabel.TextScaled = true
+pingLabel.Font = Enum.Font.GothamBold
+pingLabel.TextStrokeTransparency = 0.5
+pingLabel.TextStrokeColor3 = Color3.fromRGB(150, 200, 255)
+pingLabel.Parent = mainFrame
 
-local Ping_Label = Instance.new("TextLabel")
-Ping_Label.Parent = Frame
-Ping_Label.Size = UDim2.new(1, 0, 0, 30)
-Ping_Label.Position = UDim2.new(0, 0, 0, 35)
-Ping_Label.BackgroundTransparency = 1
-Ping_Label.Font = Enum.Font.GothamBold
-Ping_Label.TextSize = 22
-Ping_Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-Ping_Label.TextStrokeTransparency = 0
-Ping_Label.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
-Ping_Label.TextStroke = 1
-Ping_Label.Text = "Ping: 0ms"
+local timerLabel = Instance.new("TextLabel")
+timerLabel.Size = UDim2.new(1, 0, 0, 30)
+timerLabel.Position = UDim2.new(0, 0, 0, 75)
+timerLabel.BackgroundTransparency = 1
+timerLabel.Text = "00:00:00"
+timerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+timerLabel.TextScaled = true
+timerLabel.Font = Enum.Font.GothamBold
+timerLabel.TextStrokeTransparency = 0.5
+timerLabel.TextStrokeColor3 = Color3.fromRGB(150, 200, 255)
+timerLabel.Parent = mainFrame
 
-local Time_Label = Instance.new("TextLabel")
-Time_Label.Parent = Frame
-Time_Label.Size = UDim2.new(1, 0, 0, 30)
-Time_Label.Position = UDim2.new(0, 0, 0, 65)
-Time_Label.BackgroundTransparency = 1
-Time_Label.Font = Enum.Font.GothamBold
-Time_Label.TextSize = 22
-Time_Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-Time_Label.TextStrokeTransparency = 0
-Time_Label.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
-Time_Label.TextStroke = 1
-Time_Label.Text = "Time: 00:00:00"
-
--- نظام السحب
-local dragging = false
-local dragStart = nil
-local startPos = nil
-
-Frame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = Frame.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - dragStart
-        Frame.Position = UDim2.new(
-            startPos.X.Scale,
-            startPos.X.Offset + delta.X,
-            startPos.Y.Scale,
-            startPos.Y.Offset + delta.Y
-        )
-    end
-end)
-
--- حساب FPS
-local fps = 0
+-- متغيرات FPS
 local frameCount = 0
-local fpsTimer = tick()
+local lastTime = os.clock()
+local fps = 0
 
-RunService.RenderStepped:Connect(function()
-    frameCount = frameCount + 1
-    if tick() - fpsTimer >= 0.5 then
-        fps = math.floor(frameCount / (tick() - fpsTimer))
-        frameCount = 0
-        fpsTimer = tick()
-        FPS_Label.Text = "FPS: " .. fps
-    end
-end)
+-- متغيرات العداد
+local startTime = os.clock()
+local timerRunning = true
 
--- تحديث البنغ والوقت
-local startTime = tick()
+local function updateTimer()
+    if not timerRunning then return end
+    local elapsed = os.clock() - startTime
+    local hours = math.floor(elapsed / 3600)
+    local minutes = math.floor((elapsed % 3600) / 60)
+    local seconds = math.floor(elapsed % 60)
+    timerLabel.Text = string.format("%02d:%02d:%02d", hours, minutes, seconds)
+end
 
-task.spawn(function()
+-- دالة منع الطرد (حركة ماوس بسيطة جداً، بدون ضغط زر)
+local function preventAFK()
+    -- تحريك الماوس 1 بيكسل يميناً ثم إعادته (لا يظهر تأثير على الشاشة)
+    VirtualInput:SendMouseMovement(1, 0, false)
+    task.wait(0.05)
+    VirtualInput:SendMouseMovement(-1, 0, false)
+end
+
+-- حلقة كل 10 دقائق (أقل من حد الطرد 20 دقيقة)
+coroutine.wrap(function()
     while true do
-        local ping = LocalPlayer:GetNetworkPing()
-        Ping_Label.Text = "Ping: " .. math.floor(ping) .. "ms"
-
-        local elapsed = tick() - startTime
-        local hours = math.floor(elapsed / 3600)
-        local minutes = math.floor((elapsed % 3600) / 60)
-        local seconds = math.floor(elapsed % 60)
-        Time_Label.Text = string.format("Time: %02d:%02d:%02d", hours, minutes, seconds)
-
-        task.wait(1)
-    end
-end)
-
--- تحريك التدرج اللوني من الأسود إلى الأحمر
-task.spawn(function()
-    while true do
-        local t = (math.sin(tick() * 0.8) + 1) / 2  -- قيمة بين 0 و 1
-        local redValue = 10 + 140 * t               -- من 10 إلى 150
-        Gradient.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 0, 0)),
-            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(redValue / 2, 0, 0)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(redValue, 0, 0))
-        })
-        task.wait(0.05)
-    end
-end)
-
--- نظام منع الطرد
-local lastAntiAFK = tick()
-local ANTI_AFK_INTERVAL = 5 * 60  -- كل 5 دقائق
-
-RunService.Heartbeat:Connect(function()
-    if tick() - lastAntiAFK >= ANTI_AFK_INTERVAL then
-        lastAntiAFK = tick()
-        VirtualUser:CaptureController()
-        VirtualUser:ClickButton2(Vector2.new())
-        local character = LocalPlayer.Character
-        if character and character:FindFirstChild("Humanoid") then
-            character:Move(Vector3.new(0.1, 0, 0.1), true)
-            task.wait(0.1)
-            character:Move(Vector3.new(-0.1, 0, -0.1), true)
+        task.wait(600) -- 10 دقائق
+        if LocalPlayer and LocalPlayer.Parent then
+            preventAFK()
+        else
+            break
         end
     end
+end)()
+
+-- تحديث القيم كل إطار
+RunService.Heartbeat:Connect(function(deltaTime)
+    -- FPS
+    frameCount = frameCount + 1
+    local currentTime = os.clock()
+    if currentTime - lastTime >= 1 then
+        fps = frameCount
+        frameCount = 0
+        lastTime = currentTime
+        fpsLabel.Text = "FPS: " .. fps
+    end
+
+    -- Ping
+    local ping = Stats:GetPing() or 0
+    pingLabel.Text = "Ping: " .. math.floor(ping * 1000) .. "ms"
+
+    -- تحديث العداد
+    updateTimer()
+
+    -- تحول الخلفية للأحمر الداكن تدريجياً
+    local elapsed = os.clock() - startTime
+    local intensity = math.min(elapsed / 60, 1)
+    local red = math.floor(30 + intensity * 70)
+    local green = math.floor(10 - intensity * 8)
+    local blue = math.floor(10 - intensity * 8)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(red, math.max(0, green), math.max(0, blue))
 end)
+
+-- إيقاف العداد عند الخروج
+LocalPlayer:GetPropertyChangedSignal("Parent"):Connect(function()
+    if LocalPlayer.Parent == nil then
+        timerRunning = false
+    end
+end)
+
+game:GetService("Players").PlayerRemoving:Connect(function(player)
+    if player == LocalPlayer then
+        timerRunning = false
+    end
+end)
+
+print("Anti-AFK (mouse movement only) loaded - no key presses!")
