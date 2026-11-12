@@ -1,15 +1,27 @@
 --══════════════════════════════════════════════════════════════
 --  LANSHER~HUB · v7.0
---  هيكل Lansher Hub v5.1 + صور جديدة + انترو fullscreen
+--  هيكل Lansher Hub v5.1 الأصلي + صور جديدة + انترو fullscreen
 --══════════════════════════════════════════════════════════════
+
+--══════════ SECTION 1: SERVICES (من Lansher الأصلي) ══════════
 local Players          = game:GetService("Players")
-local TweenService     = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local TweenService     = game:GetService("TweenService")
 local CoreGui          = game:GetService("CoreGui")
 local Workspace        = game:GetService("Workspace")
+local Lighting         = game:GetService("Lighting")
+local VirtualUser      = game:GetService("VirtualUser")
+local TeleportService  = game:GetService("TeleportService")
 
-local player    = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+local LocalPlayer = Players.LocalPlayer
+local Camera      = Workspace.CurrentCamera
+
+local RGB = Color3.fromRGB
+local U2  = UDim2.new
+local UD  = UDim.new
+local V2  = Vector2.new
+local New = Instance.new
+local TI  = TweenInfo.new
 
 --══════════════════════════════════════════════════════════════
 --  ★ ASSET IDs ★
@@ -19,13 +31,13 @@ local A = {
     intro2 = "rbxassetid://106762064444203",
     intro3 = "rbxassetid://117909885869841",
     intro4 = "rbxassetid://123598571664419",
-    intro5 = "rbxassetid://93820894136588",   -- الأخيرة
+    intro5 = "rbxassetid://93820894136588",   -- الأخيرة (Welcome + Start)
 
     uiBg   = "rbxassetid://123598571664419",
     toggle = "rbxassetid://117909885869841",
 }
 
---══════════════ SCRIPTS ══════════════
+--══════════ SCRIPTS ══════════
 local S = {
     zeco   = "https://pastefy.app/mXMaE9fC/raw",
     askar  = "https://rawscripts.net/raw/Brookhaven-RP-3skr-hub-240894",
@@ -44,7 +56,7 @@ local S = {
     ravex  = "https://rawscripts.net/raw/Brookhaven-RP-RAVEX-HUB-ARAB-NOW-86210",
 }
 
---══════════════ INFINITE ══════════════
+--══════════ INFINITE ══════════
 local INFINITE_URL = ""
 local CMD_PREFIX   = "/"
 
@@ -75,27 +87,26 @@ local ALL_COMMANDS = {
     "autokeypress nan", "autokeypress", "nofog",
 }
 
---══════════════ COLORS (من Lansher Hub الأصلي) ══════════════
+--══════════ SECTION 2: CONFIG (من Lansher الأصلي) ══════════
 local CFG = {
     Hub_Name    = "Lansher~Hub",
     Hub_Version = "v7.0",
     Toggle_Key  = Enum.KeyCode.RightShift,
 
-    Cor_Hub     = Color3.fromRGB(15, 15, 15),
-    Cor_Options = Color3.fromRGB(28, 28, 28),
-    Cor_Stroke  = Color3.fromRGB(255, 50, 50),
-    Cor_Text    = Color3.fromRGB(255, 255, 255),
-    Cor_Dark    = Color3.fromRGB(150, 150, 150),
-    Cor_Success = Color3.fromRGB(50, 220, 130),
-    Cor_Warn    = Color3.fromRGB(255, 180, 50),
-    Cor_Error   = Color3.fromRGB(255, 70, 70),
+    Cor_Hub     = RGB(15, 15, 15),
+    Cor_Options = RGB(28, 28, 28),
+    Cor_Stroke  = RGB(255, 50, 50),
+    Cor_Text    = RGB(255, 255, 255),
+    Cor_Dark    = RGB(150, 150, 150),
+    Cor_Success = RGB(50, 220, 130),
+    Cor_Warn    = RGB(255, 180, 50),
+    Cor_Error   = RGB(255, 70, 70),
 
     Font   = Enum.Font.FredokaOne,
-    Corner = UDim.new(0, 12),
+    Corner = UD(0, 12),
 }
-local C = CFG
 
---══════════════ HELPERS (من Lansher Hub) ══════════════
+--══════════ SECTION 3: HELPERS (من Lansher الأصلي) ══════════
 local function Create(cls, parent, props)
     local o = Instance.new(cls, parent)
     if props then for k, v in pairs(props) do o[k] = v end end
@@ -103,13 +114,13 @@ local function Create(cls, parent, props)
 end
 
 local function Corner(parent, radius)
-    local c = Instance.new("UICorner", parent)
+    local c = New("UICorner", parent)
     c.CornerRadius = radius or CFG.Corner
     return c
 end
 
 local function Stroke(parent)
-    local s = Instance.new("UIStroke", parent)
+    local s = New("UIStroke", parent)
     s.Color = CFG.Cor_Stroke
     s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     s.Thickness = 2
@@ -117,20 +128,20 @@ local function Stroke(parent)
 end
 
 local function Tween(obj, prop, value, time, wait)
-    local t = TweenService:Create(obj, TweenInfo.new(time or 0.2), {[prop] = value})
+    local t = TweenService:Create(obj, TI(time or 0.2), {[prop] = value})
     t:Play()
     if wait then t.Completed:Wait() end
     return t
 end
 
---══════════════ NOTIFICATIONS (من Lansher Hub) ══════════════
+--══════════ SECTION 4: NOTIFICATIONS (من Lansher الأصلي) ══════════
 local function Notify(title, text, kind, dur)
     local gui = CoreGui:FindFirstChild("LansherNotifs")
     if not gui then
         gui = Create("ScreenGui", CoreGui, {Name = "LansherNotifs", ResetOnSpawn = false, DisplayOrder = 999})
         local frame = Create("Frame", gui, {
-            Size = UDim2.new(0, 260, 1, -20),
-            Position = UDim2.new(1, -270, 0, 10),
+            Size = U2(0, 280, 1, -20),
+            Position = U2(1, -290, 0, 10),
             BackgroundTransparency = 1,
         })
         Create("UIListLayout", frame, {Padding = UDim.new(0, 6), VerticalAlignment = Enum.VerticalAlignment.Bottom})
@@ -140,20 +151,20 @@ local function Notify(title, text, kind, dur)
     local col = colors[kind] or colors.info
 
     local n = Create("Frame", container, {
-        Size = UDim2.new(1, 0, 0, 56),
+        Size = U2(1, 0, 0, 60),
         BackgroundColor3 = CFG.Cor_Hub,
         BorderSizePixel = 0,
     })
     Corner(n)
-    local accent = Create("Frame", n, {Size = UDim2.new(0, 4, 1, 0), BackgroundColor3 = col, BorderSizePixel = 0})
-    Corner(accent, UDim.new(1, 0))
+    local accent = Create("Frame", n, {Size = U2(0, 4, 1, 0), BackgroundColor3 = col, BorderSizePixel = 0})
+    Corner(accent, UD(1, 0))
     Create("TextLabel", n, {
-        Size = UDim2.new(1, -20, 0, 20), Position = UDim2.new(0, 10, 0, 6),
+        Size = U2(1, -20, 0, 20), Position = U2(0, 10, 0, 6),
         BackgroundTransparency = 1, Text = title, TextColor3 = CFG.Cor_Text,
         Font = CFG.Font, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left,
     })
     Create("TextLabel", n, {
-        Size = UDim2.new(1, -20, 0, 26), Position = UDim2.new(0, 10, 0, 26),
+        Size = U2(1, -20, 0, 30), Position = U2(0, 10, 0, 26),
         BackgroundTransparency = 1, Text = text, TextColor3 = col,
         Font = CFG.Font, TextSize = 11, TextWrapped = true,
         TextXAlignment = Enum.TextXAlignment.Left,
@@ -170,43 +181,10 @@ end
 
 local function safeNotify(t, txt, k, d) pcall(Notify, t, txt, k, d) end
 
---══════════════ SCRIPT RUNNER ══════════════
-local function runURL(btn, url, originalText)
-    if not url or url == "" then
-        btn.Text = "— الرابط غير متوفر —"
-        btn.BackgroundColor3 = CFG.Cor_Warn
-        task.wait(1.5)
-        btn.Text = originalText
-        btn.BackgroundColor3 = CFG.Cor_Options
-        return
-    end
-    btn.Text = "جارٍ التحميل..."
-    local ok, err = pcall(function()
-        local src = game:HttpGet(url)
-        local fn = loadstring(src)
-        if not fn then error("loadstring فشل") end
-        fn()
-    end)
-    if ok then
-        btn.Text = "✓ تم التشغيل"
-        btn.BackgroundColor3 = CFG.Cor_Success
-        safeNotify("Lansher", originalText .. " اشتغل", "success", 2)
-    else
-        btn.Text = "✗ " .. tostring(err):sub(1, 25)
-        btn.BackgroundColor3 = CFG.Cor_Error
-        safeNotify("خطأ", tostring(err):sub(1, 60), "error", 3)
-    end
-    task.wait(1.6)
-    btn.Text = originalText
-    btn.BackgroundColor3 = CFG.Cor_Options
-end
-
---══════════════ INTRO (fullscreen) ══════════════
-local SEQ  = { A.intro1, A.intro2, A.intro3, A.intro4 }
-local FINAL_IMG = A.intro5
-local HOLD, FADE = 2.0, 0.35
-
-local introGui = Create("ScreenGui", CoreGui, {
+--══════════════════════════════════════════════════════════════
+--  SECTION 5: INTRO (fullscreen + fade transitions + Start)
+--══════════════════════════════════════════════════════════════
+local IntroGui = Create("ScreenGui", CoreGui, {
     Name = "LansherIntro",
     IgnoreGuiInset = true,
     ResetOnSpawn = false,
@@ -214,50 +192,154 @@ local introGui = Create("ScreenGui", CoreGui, {
     ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 })
 
--- خلفية سوداء كاملة تغطي كل الشاشة
-local introBg = Create("Frame", introGui, {
-    Size = UDim2.fromScale(1, 1),
-    Position = UDim2.fromScale(0, 0),
-    BackgroundColor3 = Color3.new(0, 0, 0),
+local IntroBg = Create("Frame", IntroGui, {
+    Size = U2(1, 1),
+    BackgroundColor3 = RGB(0, 0, 0),
     BorderSizePixel = 0,
     ZIndex = 1,
 })
 
--- الصورة على كامل الشاشة (Crop = تعبي كل الشاشة بدون حدود)
-local introImg = Create("ImageLabel", introGui, {
-    Size = UDim2.fromScale(1, 1),
-    Position = UDim2.fromScale(0, 0),
+-- الصورة الحالية
+local IntroImg = Create("ImageLabel", IntroGui, {
+    Size = U2(1, 1),
     BackgroundTransparency = 1,
     ScaleType = Enum.ScaleType.Crop,
+    ImageTransparency = 0,
     ZIndex = 2,
 })
 
-local function tw(o, t, p)
-    local t1 = TweenService:Create(o, TweenInfo.new(t), p)
-    t1:Play(); return t1
+-- الصورة القادمة (تحت الحالية عشان السحب الناعم)
+local IntroImgNext = Create("ImageLabel", IntroGui, {
+    Size = U2(1, 1),
+    BackgroundTransparency = 1,
+    ScaleType = Enum.ScaleType.Crop,
+    ImageTransparency = 1,
+    ZIndex = 2,
+})
+
+-- الواجهة الأخيرة (Welcome + Start)
+local FinalOverlay = Create("Frame", IntroGui, {
+    Size = U2(1, 1),
+    BackgroundColor3 = RGB(0, 0, 0),
+    BackgroundTransparency = 1,
+    BorderSizePixel = 0,
+    Visible = false,
+    ZIndex = 10,
+})
+
+local WelcomeLbl = Create("TextLabel", FinalOverlay, {
+    Size = U2(1, 0, 0, 80),
+    Position = U2(0.5, 0, 0.42, -60),
+    AnchorPoint = V2(0.5, 0.5),
+    BackgroundTransparency = 1,
+    Text = "Welcome",
+    TextColor3 = CFG.Cor_Text,
+    Font = Enum.Font.FredokaOne,
+    TextSize = 54,
+    TextTransparency = 1,
+    ZIndex = 11,
+})
+local WelcomeStroke = Create("UIStroke", WelcomeLbl, {
+    Color = CFG.Cor_Stroke,
+    Thickness = 3,
+    ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
+    Transparency = 1,
+})
+
+local StartBtn = Create("TextButton", FinalOverlay, {
+    Size = U2(0, 220, 0, 56),
+    Position = U2(0.5, 0, 0.62, 0),
+    AnchorPoint = V2(0.5, 0.5),
+    BackgroundColor3 = CFG.Cor_Stroke,
+    BorderSizePixel = 0,
+    Text = "Start  /  أبدأ",
+    TextColor3 = CFG.Cor_Text,
+    Font = Enum.Font.FredokaOne,
+    TextSize = 22,
+    AutoButtonColor = false,
+    TextTransparency = 1,
+    BackgroundTransparency = 1,
+    ZIndex = 12,
+})
+Corner(StartBtn, UD(0, 30))
+local StartStroke = Create("UIStroke", StartBtn, {
+    Color = CFG.Cor_Text,
+    Thickness = 2,
+    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+    Transparency = 1,
+})
+
+-- تأثير تمرير الصور
+local function crossfadeTo(nextImage)
+    IntroImgNext.Image = nextImage
+    IntroImgNext.ImageTransparency = 1
+    IntroImgNext.Size = U2(1.05, 1.05)
+    IntroImgNext.Position = U2(-0.025, -0.025)
+
+    -- الصورة القادمة تطلع بتمدد خفيف
+    local t1 = TweenService:Create(IntroImgNext, TI(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        ImageTransparency = 0,
+        Size = U2(1, 1),
+        Position = U2(0, 0),
+    })
+    t1:Play()
+    t1.Completed:Wait()
+
+    -- الحالية تختفي
+    IntroImg.Image = IntroImgNext.Image
+    IntroImg.ImageTransparency = 0
+    IntroImgNext.ImageTransparency = 1
 end
 
 local function playIntro()
-    for i, id in ipairs(SEQ) do
-        introImg.Image = id
-        introImg.ImageTransparency = 0
-        task.wait(HOLD)
-        if i < #SEQ then
-            tw(introImg, FADE, { ImageTransparency = 1 })
-            task.wait(FADE)
-        end
-    end
-    introImg.Image = FINAL_IMG
-    introImg.ImageTransparency = 0
-    task.wait(HOLD)
-    tw(introImg, FADE, { ImageTransparency = 1 })
-    task.wait(FADE)
-    tw(introBg, 0.4, { BackgroundTransparency = 1 })
-    task.wait(0.4)
-    introGui:Destroy()
+    -- شاشة سوداء أولية
+    IntroBg.BackgroundTransparency = 0
+    IntroImg.Image = A.intro1
+    IntroImg.ImageTransparency = 0
+    task.wait(2.0)
+
+    -- انتقالات
+    crossfadeTo(A.intro2); task.wait(2.0)
+    crossfadeTo(A.intro3); task.wait(2.0)
+    crossfadeTo(A.intro4); task.wait(2.0)
+
+    -- الصورة الأخيرة
+    crossfadeTo(A.intro5)
+
+    -- تعتيم خفيف فوق الصورة الأخيرة
+    FinalOverlay.Visible = true
+    Tween(FinalOverlay, "BackgroundTransparency", 0.45, 0.5)
+
+    -- Welcome يظهر
+    Tween(WelcomeLbl, "TextTransparency", 0, 0.6)
+    Tween(WelcomeStroke, "Transparency", 0, 0.6)
+
+    -- Start يظهر
+    task.wait(0.35)
+    Tween(StartBtn, "BackgroundTransparency", 0, 0.5)
+    Tween(StartBtn, "TextTransparency", 0, 0.5)
+    Tween(StartStroke, "Transparency", 0, 0.5)
 end
 
---══════════════ MAIN GUI (نفس هيكل Lansher Hub) ══════════════
+-- الزر يفتح الواجهة ويغلق الانترو
+StartBtn.MouseButton1Click:Connect(function()
+    StartBtn.Text = "Loading..."
+    task.wait(0.4)
+    -- إغلاق الانترو
+    Tween(IntroBg, "BackgroundTransparency", 1, 0.4)
+    Tween(IntroImg, "ImageTransparency", 1, 0.4)
+    Tween(FinalOverlay, "BackgroundTransparency", 1, 0.4)
+    Tween(WelcomeLbl, "TextTransparency", 1, 0.4)
+    Tween(StartBtn, "BackgroundTransparency", 1, 0.4)
+    Tween(StartBtn, "TextTransparency", 1, 0.4)
+    Tween(StartStroke, "Transparency", 1, 0.4)
+    task.wait(0.5)
+    IntroGui:Destroy()
+end)
+
+--══════════════════════════════════════════════════════════════
+--  SECTION 6: BUILD UI (نفس Lansher Hub v5.1 بالضبط)
+--══════════════════════════════════════════════════════════════
 local oldGui = CoreGui:FindFirstChild("LansherHubXR7")
 if oldGui then oldGui:Destroy() end
 
@@ -267,21 +349,23 @@ local ScreenGui = Create("ScreenGui", CoreGui, {
     ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 })
 
--- زر الفتح (يستخدم صورة التوجل الجديدة)
+-- زر الفتح (من Lansher الأصلي + الصورة الجديدة)
 local OpenBtn = Create("ImageButton", ScreenGui, {
-    Size = UDim2.fromOffset(55, 55),
-    Position = UDim2.new(0, 30, 0.5, -27),
+    Size = U2(0, 60, 0, 60),
+    Position = U2(0, 30, 0.5, -30),
     BackgroundColor3 = CFG.Cor_Options,
     Image = A.toggle,
+    Draggable = true,
     AutoButtonColor = false,
+    Visible = false,
 })
-Corner(OpenBtn, UDim.new(1, 0))
+Corner(OpenBtn, UD(1, 0))
 Stroke(OpenBtn)
 
--- النافذة الرئيسية
+-- النافذة (نفس Lansher الأصلي)
 local Menu = Create("Frame", ScreenGui, {
-    Size = UDim2.fromOffset(560, 460),
-    Position = UDim2.new(0.5, -280, 0.5, -230),
+    Size = U2(0, 560, 0, 460),
+    Position = U2(0.5, -280, 0.5, -230),
     BackgroundColor3 = CFG.Cor_Hub,
     Visible = false,
     Active = true,
@@ -290,46 +374,45 @@ local Menu = Create("Frame", ScreenGui, {
 Corner(Menu)
 Stroke(Menu)
 
--- صورة الخلفية تحت التابات
-local bgImg = Create("ImageLabel", Menu, {
-    Size = UDim2.fromScale(1, 1),
-    Position = UDim2.fromScale(0, 0),
+-- صورة الخلفية (تحت التابات) مع تعتيم
+local BgImg = Create("ImageLabel", Menu, {
+    Size = U2(1, 1),
     BackgroundTransparency = 1,
     ScaleType = Enum.ScaleType.Crop,
     Image = A.uiBg,
-    ImageTransparency = 0.5,
+    ImageTransparency = 0.4,
     ZIndex = 1,
 })
-Corner(bgImg)
+Corner(BgImg)
 
-local bgOverlay = Create("Frame", Menu, {
-    Size = UDim2.fromScale(1, 1),
-    BackgroundColor3 = Color3.new(0, 0, 0),
-    BackgroundTransparency = 0.5,
+local BgOverlay = Create("Frame", Menu, {
+    Size = U2(1, 1),
+    BackgroundColor3 = RGB(0, 0, 0),
+    BackgroundTransparency = 0.55,
     BorderSizePixel = 0,
     ZIndex = 1,
 })
-Corner(bgOverlay)
+Corner(BgOverlay)
 
--- شريط العنوان
-local TopBar = Create("Frame", Menu, {Size = UDim2.new(1, 0, 0, 30), BackgroundTransparency = 1, ZIndex = 5})
+-- شريط العنوان (نفس Lansher الأصلي)
+local TopBar = Create("Frame", Menu, {Size = U2(1, 0, 0, 30), BackgroundTransparency = 1, ZIndex = 5})
 Create("TextLabel", TopBar, {
-    Size = UDim2.new(1, -60, 1, 0), Position = UDim2.new(0, 10, 0, 0),
-    BackgroundTransparency = 1, Text = CFG.Hub_Name .. "  " .. CFG.Hub_Version,
-    TextColor3 = CFG.Cor_Stroke, Font = CFG.Font, TextSize = 17,
+    Size = U2(1, -60, 1, 0), Position = U2(0, 10, 0, 0),
+    BackgroundTransparency = 1, Text = CFG.Hub_Name .. " " .. CFG.Hub_Version,
+    TextColor3 = CFG.Cor_Stroke, Font = CFG.Font, TextSize = 18,
     TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 5,
 })
 local CloseBtn = Create("TextButton", TopBar, {
-    Size = UDim2.new(0, 30, 0, 30), Position = UDim2.new(1, -35, 0, 0),
+    Size = U2(0, 30, 0, 30), Position = U2(1, -35, 0, 0),
     BackgroundTransparency = 1, Text = "×", TextColor3 = CFG.Cor_Text,
     Font = CFG.Font, TextSize = 22, ZIndex = 5,
 })
 CloseBtn.MouseButton1Click:Connect(function() Menu.Visible = false end)
 OpenBtn.MouseButton1Click:Connect(function() Menu.Visible = not Menu.Visible end)
 
--- التابات (عمود يسار مثل Lansher Hub الأصلي)
+-- التابات (نفس Lansher الأصلي)
 local TabFrame = Create("Frame", Menu, {
-    Size = UDim2.new(0, 150, 1, -30), Position = UDim2.new(0, 0, 0, 30),
+    Size = U2(0, 150, 1, -30), Position = U2(0, 0, 0, 30),
     BackgroundColor3 = CFG.Cor_Options,
     BackgroundTransparency = 0.15,
     ZIndex = 2,
@@ -343,7 +426,7 @@ Create("UIPadding", TabFrame, {
 })
 
 local Content = Create("Frame", Menu, {
-    Size = UDim2.new(1, -150, 1, -30), Position = UDim2.new(0, 150, 0, 30),
+    Size = U2(1, -150, 1, -30), Position = U2(0, 150, 0, 30),
     BackgroundTransparency = 1,
     ZIndex = 3,
 })
@@ -351,14 +434,14 @@ local Content = Create("Frame", Menu, {
 local tabs = {}
 local function MakeTab(name)
     local btn = Create("TextButton", TabFrame, {
-        Size = UDim2.new(1, 0, 0, 30), BackgroundColor3 = CFG.Cor_Hub,
+        Size = U2(1, 0, 0, 30), BackgroundColor3 = CFG.Cor_Hub,
         Text = name, TextColor3 = CFG.Cor_Text, Font = CFG.Font, TextSize = 13,
         AutoButtonColor = false, ZIndex = 4,
     })
     Corner(btn)
     local frame = Create("ScrollingFrame", Content, {
-        Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1,
-        ScrollBarThickness = 4, CanvasSize = UDim2.new(),
+        Size = U2(1, 0, 1, 0), BackgroundTransparency = 1,
+        ScrollBarThickness = 4, CanvasSize = U2(),
         AutomaticCanvasSize = Enum.AutomaticSize.Y, Visible = false,
         ZIndex = 4,
     })
@@ -381,7 +464,7 @@ local function MakeTab(name)
     return frame
 end
 
--- التابات الخمسة
+-- التابات الجديدة (بس)
 local TabRights   = MakeTab("~ الحقوق ~")
 local TabScripts  = MakeTab("~ سكربتاتي ~")
 local TabCommands = MakeTab("~ أوامر ~")
@@ -391,31 +474,61 @@ local TabTarget   = MakeTab("~ استهداف ~")
 TabRights.Visible = true
 tabs[1].btn.BackgroundColor3 = CFG.Cor_Stroke
 
---══════════════ WIDGETS (من Lansher Hub) ══════════════
+--══════════ SECTION 7: WIDGETS (نفس Lansher الأصلي) ══════════
 local function AddButton(parent, name, callback)
     local btn = Create("TextButton", parent, {
-        Size = UDim2.new(1, 0, 0, 30), BackgroundColor3 = CFG.Cor_Options,
+        Size = U2(1, 0, 0, 30), BackgroundColor3 = CFG.Cor_Options,
         Text = "  " .. name, TextColor3 = CFG.Cor_Text, Font = CFG.Font,
         TextSize = 13, TextXAlignment = Enum.TextXAlignment.Right, AutoButtonColor = false,
         ZIndex = 5,
     })
     Corner(btn)
     Stroke(btn)
-    local pad = Create("UIPadding", btn, {PaddingRight = UDim.new(0, 10)})
+    Create("UIPadding", btn, {PaddingRight = UDim.new(0, 10)})
     btn.MouseButton1Click:Connect(function() pcall(callback) end)
     return btn
 end
 
 local function AddLabel(parent, text)
     return Create("TextLabel", parent, {
-        Size = UDim2.new(1, 0, 0, 22), BackgroundTransparency = 1,
+        Size = U2(1, 0, 0, 22), BackgroundTransparency = 1,
         Text = "  ◆ " .. text, TextColor3 = CFG.Cor_Stroke,
         Font = CFG.Font, TextSize = 12, TextXAlignment = Enum.TextXAlignment.Right,
         ZIndex = 5,
     })
 end
 
---══════════════ TAB 1: الحقوق ══════════════
+local function runURL(btn, url, originalText)
+    if not url or url == "" then
+        btn.Text = "  — الرابط غير متوفر —"
+        btn.BackgroundColor3 = CFG.Cor_Warn
+        task.wait(1.5)
+        btn.Text = "  " .. originalText
+        btn.BackgroundColor3 = CFG.Cor_Options
+        return
+    end
+    btn.Text = "  جارٍ التحميل..."
+    local ok, err = pcall(function()
+        local src = game:HttpGet(url)
+        local fn = loadstring(src)
+        if not fn then error("loadstring فشل") end
+        fn()
+    end)
+    if ok then
+        btn.Text = "  ✓ تم التشغيل"
+        btn.BackgroundColor3 = CFG.Cor_Success
+        safeNotify("Lansher", originalText .. " اشتغل", "success", 2)
+    else
+        btn.Text = "  ✗ " .. tostring(err):sub(1, 25)
+        btn.BackgroundColor3 = CFG.Cor_Error
+        safeNotify("خطأ", tostring(err):sub(1, 60), "error", 3)
+    end
+    task.wait(1.6)
+    btn.Text = "  " .. originalText
+    btn.BackgroundColor3 = CFG.Cor_Options
+end
+
+--══════════ SECTION 8: TAB 1 — الحقوق ══════════
 AddLabel(TabRights, "هذا السكربت خاص بـ Lansher~Hub")
 
 local copyBtn = AddButton(TabRights, "w_.0.10    (اضغط للنسخ)", function()
@@ -434,7 +547,7 @@ local copyBtn = AddButton(TabRights, "w_.0.10    (اضغط للنسخ)", functio
     end
 end)
 
---══════════════ TAB 2: سكربتاتي ══════════════
+--══════════ SECTION 9: TAB 2 — سكربتاتي ══════════
 AddLabel(TabScripts, "السكربتات العربية")
 AddButton(TabScripts, "سكربت زيكو",         function() loadstring(game:HttpGet(S.zeco))() end)
 AddButton(TabScripts, "سكربت عسكر",         function() loadstring(game:HttpGet(S.askar))() end)
@@ -454,10 +567,16 @@ AddButton(TabScripts, "طيران عدنان",  function() loadstring(game:HttpG
 AddButton(TabScripts, "JG",           function() loadstring(game:HttpGet(S.jg))() end)
 AddButton(TabScripts, "رافكس",        function() loadstring(game:HttpGet(S.ravex))() end)
 
---══════════════ TAB 3: أوامر ══════════════
+--══════════ SECTION 10: TAB 3 — أوامر ══════════
 AddLabel(TabCommands, "الأوامر الـ" .. #ALL_COMMANDS .. " (عبر infinite)")
 
-local cmdListLabel = AddLabel(TabCommands, table.concat(ALL_COMMANDS, "  •  "))
+local cmdListLabel = Create("TextLabel", TabCommands, {
+    Size = U2(1, 0, 0, 44), BackgroundTransparency = 1,
+    Text = table.concat(ALL_COMMANDS, " • "),
+    TextColor3 = CFG.Cor_Dark, Font = CFG.Font, TextSize = 10,
+    TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Right,
+    ZIndex = 5,
+})
 
 local activateCmdBtn = AddButton(TabCommands, "تفعيل الاوامر", function()
     ensureInfinite()
@@ -478,7 +597,7 @@ local activateCmdBtn = AddButton(TabCommands, "تفعيل الاوامر", funct
     end)
 end)
 
---══════════════ TAB 4: تقليل لاج ══════════════
+--══════════ SECTION 11: TAB 4 — تقليل لاج ══════════
 AddLabel(TabAntiLag, "يُنفَّذ عبر infinite:")
 AddLabel(TabAntiLag, "▸ xray     ▸ antilag")
 
@@ -500,14 +619,14 @@ local antiBtn = AddButton(TabAntiLag, "تفعيل تقليل اللاج", functi
     end)
 end)
 
---══════════════ TAB 5: استهداف ══════════════
+--══════════ SECTION 12: TAB 5 — استهداف ══════════
 AddLabel(TabTarget, "سكربتات استهداف")
 AddButton(TabTarget, "NO9AT SAMLAT", function() loadstring(game:HttpGet(S.no9))() end)
 AddButton(TabTarget, "Samlat",       function() loadstring(game:HttpGet(S.no9))() end)
 AddButton(TabTarget, "تسجيل سلندر",  function() safeNotify("تنبيه", "الرابط غير مضاف", "warn", 2) end)
 AddButton(TabTarget, "تسجيل نووي",   function() safeNotify("تنبيه", "الرابط غير مضاف", "warn", 2) end)
 
---══════════════ KEYBIND ══════════════
+--══════════ SECTION 13: KEYBIND & INIT ══════════
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
     if input.KeyCode == CFG.Toggle_Key then
@@ -515,9 +634,11 @@ UserInputService.InputBegan:Connect(function(input, gp)
     end
 end)
 
---══════════════ INIT ══════════════
 task.spawn(function()
     playIntro()
+    -- StartBtn اضغط → يفتح الواجهة
+    StartBtn.MouseButton1Click:Wait()
+    task.wait(0.6)
     OpenBtn.Visible = true
     Menu.Visible = true
     safeNotify("Lansher~Hub", "v7.0 جاهز 🛡️", "success", 3)
