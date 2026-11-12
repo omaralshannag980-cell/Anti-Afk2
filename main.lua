@@ -1,5 +1,5 @@
 --══════════════════════════════════════════════════════════════
---  REDZ HUB · v6.2  (Intro + Tabs + Infinite Commands)
+--  REDZ HUB · v6.3  (Mobile + Intro + Tabs + Infinite Commands)
 --══════════════════════════════════════════════════════════════
 local Players          = game:GetService("Players")
 local TweenService     = game:GetService("TweenService")
@@ -10,23 +10,18 @@ local player    = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 --══════════════════════════════════════════════════════════════
---  ★★★ ASSET IDs — كل IDs الصور هنا ★★★
+--  ★ ASSET IDs ★
 --══════════════════════════════════════════════════════════════
 local A = {
-    -- صور الانترو (تظهر بالتتابع كل ثانيتين)
-    intro1     = "rbxassetid://128405788519714",
-    intro2     = "rbxassetid://133456528236109",
-    intro3     = "rbxassetid://92480531337183",
-    intro4     = "rbxassetid://122082194057129",
-    intro5     = "rbxassetid://96392873626158",
-    introFinal = "rbxassetid://121408431763185",  -- الصورة الأخيرة (تطلع ثانيتين)
+    intro1 = "rbxassetid://138270086550975",
+    intro2 = "rbxassetid://106762064444203",
+    intro3 = "rbxassetid://117909885869841",
+    intro4 = "rbxassetid://123598571664419",
+    intro5 = "rbxassetid://93820894136588",
 
-    -- ★ خلفية الواجهة الرئيسية
-    uiBg       = "rbxassetid://96392873626158",
-    -- ★ صورة الزر الدائري (التوجل)
-    toggle     = "rbxassetid://128405788519714",
+    uiBg   = "rbxassetid://123598571664419",
+    toggle = "rbxassetid://117909885869841",
 }
---══════════════════════════════════════════════════════════════
 
 --══════════════ SCRIPTS ══════════════
 local S = {
@@ -47,9 +42,9 @@ local S = {
     ravex  = "https://rawscripts.net/raw/Brookhaven-RP-RAVEX-HUB-ARAB-NOW-86210",
 }
 
---══════════════ INFINITE CONFIG ══════════════
-local INFINITE_URL = ""   -- ← رابط سكربت infinite
-local CMD_PREFIX   = "/"  -- ← بادئة الأوامر
+--══════════════ INFINITE ══════════════
+local INFINITE_URL = ""   -- ← رابط infinite
+local CMD_PREFIX   = "/"
 
 local _infiniteReady = false
 local function ensureInfinite()
@@ -72,21 +67,13 @@ local function fireCmd(cmd)
 end
 
 local ALL_COMMANDS = {
-    "2022materials",
-    "clearerror",
-    "backtrack nan",
-    "antiafk",
-    "antikick",
-    "datalimit 660",
-    "backtrack 999",
-    "xray",
-    "antilag",
-    "autokeypress nan",
-    "autokeypress",
-    "nofog",
+    "2022materials", "clearerror", "backtrack nan",
+    "antiafk", "antikick", "datalimit 660",
+    "backtrack 999", "xray", "antilag",
+    "autokeypress nan", "autokeypress", "nofog",
 }
 
---══════════════ COLORS / FONTS ══════════════
+--══════════════ COLORS ══════════════
 local C = {
     bg     = Color3.fromRGB(15, 15, 15),
     panel  = Color3.fromRGB(26, 26, 28),
@@ -124,10 +111,10 @@ local function label(parent, text, size, pos, col, bold, align)
     l.Text = text
     l.TextColor3 = col or C.text
     l.Font = bold and FONT_B or FONT_R
-    l.TextSize = 15
+    l.TextSize = 14
     l.TextXAlignment = align or Enum.TextXAlignment.Right
     l.TextWrapped = true
-    l.ZIndex = 4
+    l.ZIndex = 6
     l.Parent = parent
     return l
 end
@@ -143,8 +130,8 @@ local function Notify(title, text, kind)
         notifGui.IgnoreGuiInset = true
         notifGui.Parent = playerGui
         local f = Instance.new("Frame")
-        f.Size = UDim2.new(0, 280, 1, -20)
-        f.Position = UDim2.new(1, -290, 0, 10)
+        f.Size = UDim2.new(0, 240, 1, -20)
+        f.Position = UDim2.new(1, -250, 0, 10)
         f.BackgroundTransparency = 1
         f.Parent = notifGui
         local lay = Instance.new("UIListLayout")
@@ -157,7 +144,7 @@ local function Notify(title, text, kind)
     local col = cols[kind] or C.accent
 
     local n = Instance.new("Frame")
-    n.Size = UDim2.new(1, 0, 0, 58)
+    n.Size = UDim2.new(1, 0, 0, 52)
     n.BackgroundColor3 = C.bg
     n.BorderSizePixel = 0
     n.Parent = container
@@ -171,9 +158,9 @@ local function Notify(title, text, kind)
     acc.Parent = n
     corner(acc, 999)
 
-    label(n, title, UDim2.new(1, -20, 0, 20), UDim2.new(0, 10, 0, 6), C.text, true, Enum.TextXAlignment.Left).TextSize = 13
-    local d = label(n, text, UDim2.new(1, -20, 0, 28), UDim2.new(0, 10, 0, 26), col, false, Enum.TextXAlignment.Left)
-    d.TextSize = 11
+    label(n, title, UDim2.new(1, -20, 0, 18), UDim2.new(0, 10, 0, 6), C.text, true, Enum.TextXAlignment.Left).TextSize = 12
+    local d = label(n, text, UDim2.new(1, -20, 0, 24), UDim2.new(0, 10, 0, 24), col, false, Enum.TextXAlignment.Left)
+    d.TextSize = 10
 
     task.delay(3, function()
         TweenService:Create(n, TweenInfo.new(0.3), { BackgroundTransparency = 1 }):Play()
@@ -215,7 +202,8 @@ local function runURL(btn, url, originalText)
 end
 
 --══════════════ INTRO ══════════════
-local SEQ  = { A.intro1, A.intro2, A.intro3, A.intro4, A.intro5 }
+local SEQ  = { A.intro1, A.intro2, A.intro3, A.intro4 }
+local FINAL_IMG = A.intro5
 local HOLD, FADE = 2.0, 0.35
 
 local introGui = Instance.new("ScreenGui")
@@ -252,7 +240,7 @@ local function playIntro()
             task.wait(FADE)
         end
     end
-    introImg.Image = A.introFinal
+    introImg.Image = FINAL_IMG
     introImg.ImageTransparency = 0
     task.wait(HOLD)
     tw(introImg, FADE, { ImageTransparency = 1 })
@@ -262,7 +250,7 @@ local function playIntro()
     introGui:Destroy()
 end
 
---══════════════ MAIN GUI ══════════════
+--══════════════ MAIN GUI (Mobile) ══════════════
 local gui = Instance.new("ScreenGui")
 gui.Name = "RedzHubGui"
 gui.IgnoreGuiInset = true
@@ -271,72 +259,99 @@ gui.DisplayOrder = 100
 gui.Parent = playerGui
 
 local win = Instance.new("Frame")
-win.Size = UDim2.fromOffset(760, 500)
-win.Position = UDim2.new(0.5, -380, 0.5, -250)
+win.Size = UDim2.new(0.92, 0, 0.85, 0)
+win.Position = UDim2.new(0.5, 0, 0.5, 0)
+win.AnchorPoint = Vector2.new(0.5, 0.5)
 win.BackgroundColor3 = C.bg
 win.BorderSizePixel = 0
 win.ClipsDescendants = true
 win.Visible = false
 win.Active = true
 win.Parent = gui
-corner(win, 12)
+corner(win, 14)
 stroke(win, C.accent, 2)
 
--- خلفية الواجهة (من A.uiBg)
-local bgImg = Instance.new("ImageLabel")
-bgImg.Size = UDim2.fromScale(1, 1)
-bgImg.BackgroundTransparency = 1
-bgImg.ScaleType = Enum.ScaleType.Stretch
-bgImg.Image = A.uiBg
-bgImg.ImageTransparency = 0.35
-bgImg.ZIndex = 1
-bgImg.Parent = win
-corner(bgImg, 12)
+local sizeCap = Instance.new("UISizeConstraint")
+sizeCap.MaxSize = Vector2.new(420, 620)
+sizeCap.MinSize = Vector2.new(280, 420)
+sizeCap.Parent = win
 
--- عنوان Redz Hub
+-- شريط العنوان
 local titleBar = Instance.new("TextLabel")
-titleBar.Size = UDim2.new(1, -20, 0, 26)
-titleBar.Position = UDim2.new(0, 10, 0, 4)
+titleBar.Size = UDim2.new(1, -20, 0, 30)
+titleBar.Position = UDim2.new(0, 10, 0, 0)
 titleBar.BackgroundTransparency = 1
-titleBar.Text = "REDZ HUB  ·  v6.2"
+titleBar.Text = "REDZ HUB  ·  v6.3"
 titleBar.TextColor3 = C.accent
 titleBar.Font = FONT_B
-titleBar.TextSize = 16
+titleBar.TextSize = 15
 titleBar.TextXAlignment = Enum.TextXAlignment.Left
 titleBar.ZIndex = 6
 titleBar.Parent = win
 
-local sidebar = Instance.new("Frame")
-sidebar.Size = UDim2.new(0, 175, 1, -30)
-sidebar.Position = UDim2.new(0, 0, 0, 30)
-sidebar.BackgroundColor3 = C.panel
-sidebar.BackgroundTransparency = 0.15
-sidebar.BorderSizePixel = 0
-sidebar.ZIndex = 2
-sidebar.Parent = win
-corner(sidebar, 12)
+-- شريط التابات الأفقي
+local tabBar = Instance.new("Frame")
+tabBar.Size = UDim2.new(1, -12, 0, 38)
+tabBar.Position = UDim2.new(0, 6, 0, 32)
+tabBar.BackgroundColor3 = C.panel
+tabBar.BackgroundTransparency = 0.2
+tabBar.BorderSizePixel = 0
+tabBar.ZIndex = 2
+tabBar.Parent = win
+corner(tabBar, 8)
 
+local tabBarLayout = Instance.new("UIListLayout")
+tabBarLayout.FillDirection = Enum.FillDirection.Horizontal
+tabBarLayout.Padding = UDim.new(0, 4)
+tabBarLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+tabBarLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+tabBarLayout.Parent = tabBar
+
+-- المحتوى
 local content = Instance.new("Frame")
-content.Size = UDim2.new(1, -175, 1, -30)
-content.Position = UDim2.new(0, 175, 0, 30)
+content.Size = UDim2.new(1, -12, 1, -80)
+content.Position = UDim2.new(0, 6, 0, 76)
+content.BackgroundColor3 = C.bg
 content.BackgroundTransparency = 1
-content.ZIndex = 2
+content.BorderSizePixel = 0
+content.ZIndex = 3
 content.Parent = win
+corner(content, 8)
+
+-- صورة الخلفية تحت التابات
+local bgImg = Instance.new("ImageLabel")
+bgImg.Size = UDim2.fromScale(1, 1)
+bgImg.BackgroundTransparency = 1
+bgImg.ScaleType = Enum.ScaleType.Crop
+bgImg.Image = A.uiBg
+bgImg.ImageTransparency = 0.55
+bgImg.ZIndex = 3
+bgImg.Parent = content
+corner(bgImg, 8)
+
+local bgOverlay = Instance.new("Frame")
+bgOverlay.Size = UDim2.fromScale(1, 1)
+bgOverlay.BackgroundColor3 = Color3.new(0, 0, 0)
+bgOverlay.BackgroundTransparency = 0.45
+bgOverlay.BorderSizePixel = 0
+bgOverlay.ZIndex = 3
+bgOverlay.Parent = content
+corner(bgOverlay, 8)
 
 --══════════════ WIDGETS ══════════════
 local function makeBtn(parent, text, y, cb)
     local b = Instance.new("TextButton")
-    b.Size = UDim2.new(1, -16, 0, 34)
+    b.Size = UDim2.new(1, -16, 0, 32)
     b.Position = UDim2.new(0, 8, 0, y)
     b.BackgroundColor3 = C.btn
     b.BorderSizePixel = 0
     b.Text = text
     b.TextColor3 = C.text
     b.Font = FONT_B
-    b.TextSize = 13
+    b.TextSize = 12
     b.TextXAlignment = Enum.TextXAlignment.Right
     b.AutoButtonColor = false
-    b.ZIndex = 4
+    b.ZIndex = 6
     b.Parent = parent
     corner(b, 7)
     stroke(b, C.accent, 1)
@@ -349,22 +364,22 @@ end
 
 --══════════════ TAB 1: الحقوق ══════════════
 local function buildRights(p)
-    local t = label(p, "~ الحقوق ~", UDim2.new(1, -20, 0, 32), UDim2.new(0, 10, 0, 12), C.accent, true)
-    t.TextSize = 22
+    local t = label(p, "~ الحقوق ~", UDim2.new(1, -20, 0, 28), UDim2.new(0, 10, 0, 8), C.accent, true)
+    t.TextSize = 18
 
-    label(p, "هذا السكربت خاص بـ Redz Hub", UDim2.new(1, -20, 0, 24), UDim2.new(0, 10, 0, 52), C.sub, false)
+    label(p, "هذا السكربت خاص بـ Redz Hub", UDim2.new(1, -20, 0, 20), UDim2.new(0, 10, 0, 42), C.sub, false).TextSize = 12
 
     local b = Instance.new("TextButton")
-    b.Size = UDim2.fromOffset(260, 50)
-    b.Position = UDim2.new(0, 10, 0, 90)
+    b.Size = UDim2.new(1, -20, 0, 44)
+    b.Position = UDim2.new(0, 10, 0, 76)
     b.BackgroundColor3 = C.btn
     b.BorderSizePixel = 0
     b.Text = "w_.0.10    (اضغط للنسخ)"
     b.TextColor3 = C.text
     b.Font = FONT_B
-    b.TextSize = 16
+    b.TextSize = 14
     b.AutoButtonColor = false
-    b.ZIndex = 4
+    b.ZIndex = 6
     b.Parent = p
     corner(b, 10)
     stroke(b, C.accent, 1.5)
@@ -388,21 +403,21 @@ end
 
 --══════════════ TAB 2: سكربتاتي ══════════════
 local function buildMyScripts(p)
-    local t = label(p, "~ سكربتاتي ~", UDim2.new(1, -20, 0, 32), UDim2.new(0, 10, 0, 12), C.accent, true)
-    t.TextSize = 22
+    local t = label(p, "~ سكربتاتي ~", UDim2.new(1, -20, 0, 28), UDim2.new(0, 10, 0, 8), C.accent, true)
+    t.TextSize = 18
 
     local scroll = Instance.new("ScrollingFrame")
-    scroll.Size = UDim2.new(1, -20, 1, -60)
-    scroll.Position = UDim2.new(0, 10, 0, 52)
+    scroll.Size = UDim2.new(1, -20, 1, -46)
+    scroll.Position = UDim2.new(0, 10, 0, 40)
     scroll.BackgroundTransparency = 1
     scroll.BorderSizePixel = 0
     scroll.ScrollBarThickness = 4
     scroll.CanvasSize = UDim2.new()
     scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    scroll.ZIndex = 4
+    scroll.ZIndex = 6
     scroll.Parent = p
     local lay = Instance.new("UIListLayout")
-    lay.Padding = UDim.new(0, 6)
+    lay.Padding = UDim.new(0, 5)
     lay.Parent = scroll
 
     local list = {
@@ -426,16 +441,16 @@ local function buildMyScripts(p)
     for _, item in ipairs(list) do
         local name, url = item[1], item[2]
         local b = Instance.new("TextButton")
-        b.Size = UDim2.new(1, -6, 0, 34)
+        b.Size = UDim2.new(1, -6, 0, 32)
         b.BackgroundColor3 = C.btn
         b.BorderSizePixel = 0
         b.Text = name
         b.TextColor3 = C.text
         b.Font = FONT_B
-        b.TextSize = 13
+        b.TextSize = 12
         b.TextXAlignment = Enum.TextXAlignment.Right
         b.AutoButtonColor = false
-        b.ZIndex = 4
+        b.ZIndex = 6
         b.Parent = scroll
         corner(b, 7)
         stroke(b, C.accent, 1)
@@ -448,22 +463,21 @@ end
 
 --══════════════ TAB 3: أوامر ══════════════
 local function buildCommands(p)
-    local t = label(p, "~ أوامر ~", UDim2.new(1, -20, 0, 32), UDim2.new(0, 10, 0, 12), C.accent, true)
-    t.TextSize = 22
+    local t = label(p, "~ أوامر ~", UDim2.new(1, -20, 0, 28), UDim2.new(0, 10, 0, 8), C.accent, true)
+    t.TextSize = 18
 
-    local sub = label(p, "الأوامر اللي راح تنفعل عبر infinite:", UDim2.new(1, -20, 0, 22), UDim2.new(0, 10, 0, 52), C.sub, false)
-    sub.TextSize = 13
+    label(p, "تُرسل عبر infinite:", UDim2.new(1, -20, 0, 20), UDim2.new(0, 10, 0, 40), C.sub, false).TextSize = 11
 
     local listScroll = Instance.new("ScrollingFrame")
-    listScroll.Size = UDim2.new(1, -20, 0, 200)
-    listScroll.Position = UDim2.new(0, 10, 0, 78)
+    listScroll.Size = UDim2.new(1, -20, 0, 170)
+    listScroll.Position = UDim2.new(0, 10, 0, 64)
     listScroll.BackgroundColor3 = C.panel
     listScroll.BackgroundTransparency = 0.3
     listScroll.BorderSizePixel = 0
     listScroll.ScrollBarThickness = 4
     listScroll.CanvasSize = UDim2.new()
     listScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    listScroll.ZIndex = 4
+    listScroll.ZIndex = 6
     listScroll.Parent = p
     corner(listScroll, 8)
     stroke(listScroll, C.accent, 1)
@@ -476,23 +490,23 @@ local function buildCommands(p)
     lp.Parent = listScroll
 
     local lay = Instance.new("UIListLayout")
-    lay.Padding = UDim.new(0, 4)
+    lay.Padding = UDim.new(0, 3)
     lay.Parent = listScroll
 
     for _, cmd in ipairs(ALL_COMMANDS) do
         local l = Instance.new("TextLabel")
-        l.Size = UDim2.new(1, 0, 0, 22)
+        l.Size = UDim2.new(1, 0, 0, 20)
         l.BackgroundTransparency = 1
         l.Text = "▸ " .. cmd
         l.TextColor3 = C.text
         l.Font = FONT_R
-        l.TextSize = 13
+        l.TextSize = 12
         l.TextXAlignment = Enum.TextXAlignment.Right
-        l.ZIndex = 4
+        l.ZIndex = 6
         l.Parent = listScroll
     end
 
-    local activateBtn = makeBtn(p, "تفعيل الاوامر", 290, function()
+    local activateBtn = makeBtn(p, "تفعيل الاوامر", 244, function()
         ensureInfinite()
         activateBtn.Text = "جارٍ..."
         activateBtn.BackgroundColor3 = C.warn
@@ -511,21 +525,19 @@ local function buildCommands(p)
         end)
     end)
     activateBtn.Size = UDim2.new(1, -20, 0, 44)
-    activateBtn.Position = UDim2.new(0, 10, 0, 290)
+    activateBtn.Position = UDim2.new(0, 10, 0, 244)
 end
 
 --══════════════ TAB 4: تقليل لاج ══════════════
 local function buildAntiLag(p)
-    local t = label(p, "~ تقليل لاج ~", UDim2.new(1, -20, 0, 32), UDim2.new(0, 10, 0, 12), C.accent, true)
-    t.TextSize = 22
+    local t = label(p, "~ تقليل لاج ~", UDim2.new(1, -20, 0, 28), UDim2.new(0, 10, 0, 8), C.accent, true)
+    t.TextSize = 18
 
-    local sub = label(p, "ينفعل عبر سكربت infinite:", UDim2.new(1, -20, 0, 22), UDim2.new(0, 10, 0, 52), C.sub, false)
-    sub.TextSize = 13
+    label(p, "يُنفَّذ عبر infinite:", UDim2.new(1, -20, 0, 20), UDim2.new(0, 10, 0, 40), C.sub, false).TextSize = 11
 
-    local cmds = label(p, "▸ xray     ▸ antilag", UDim2.new(1, -20, 0, 24), UDim2.new(0, 10, 0, 78), C.text, true)
-    cmds.TextSize = 14
+    label(p, "▸ xray     ▸ antilag", UDim2.new(1, -20, 0, 24), UDim2.new(0, 10, 0, 64), C.text, true).TextSize = 13
 
-    local b = makeBtn(p, "تفعيل تقليل اللاج", 110, function()
+    local b = makeBtn(p, "تفعيل تقليل اللاج", 100, function()
         ensureInfinite()
         b.Text = "جارٍ..."
         b.BackgroundColor3 = C.warn
@@ -543,13 +555,13 @@ local function buildAntiLag(p)
         end)
     end)
     b.Size = UDim2.new(1, -20, 0, 44)
-    b.Position = UDim2.new(0, 10, 0, 110)
+    b.Position = UDim2.new(0, 10, 0, 100)
 end
 
 --══════════════ TAB 5: سكربتات استهداف ══════════════
 local function buildTargeting(p)
-    local t = label(p, "~ سكربتات استهداف ~", UDim2.new(1, -20, 0, 32), UDim2.new(0, 10, 0, 12), C.accent, true)
-    t.TextSize = 22
+    local t = label(p, "~ سكربتات استهداف ~", UDim2.new(1, -20, 0, 28), UDim2.new(0, 10, 0, 8), C.accent, true)
+    t.TextSize = 18
 
     local list = {
         { "NO9AT SAMLAT", S.no9 },
@@ -558,43 +570,43 @@ local function buildTargeting(p)
         { "تسجيل نووي",   "" },
     }
 
-    local y = 52
+    local y = 42
     for _, item in ipairs(list) do
         local name, url = item[1], item[2]
         local b = makeBtn(p, name, y, function() runURL(b, url, name) end)
-        b.Size = UDim2.new(1, -20, 0, 42)
-        y = y + 48
+        b.Size = UDim2.new(1, -20, 0, 40)
+        y = y + 46
     end
 
     label(p, "* سلندر ونووي: أرسل روابطهم وأدمجها فوراً",
-          UDim2.new(1, -20, 0, 30), UDim2.new(0, 10, 0, y + 6), C.sub, false)
+          UDim2.new(1, -20, 0, 40), UDim2.new(0, 10, 0, y + 6), C.sub, false).TextSize = 11
 end
 
 --══════════════ TABS BUILD ══════════════
 local TABS = {
-    { name = "~الحقوق~",          build = buildRights },
-    { name = "~سكربتاتي~",        build = buildMyScripts },
-    { name = "~أوامر~",           build = buildCommands },
-    { name = "~تقليل لاج~",       build = buildAntiLag },
-    { name = "~سكربتات استهداف~", build = buildTargeting },
+    { name = "الحقوق",          build = buildRights },
+    { name = "سكربتاتي",        build = buildMyScripts },
+    { name = "أوامر",           build = buildCommands },
+    { name = "تقليل لاج",       build = buildAntiLag },
+    { name = "استهداف",         build = buildTargeting },
 }
 
 local tabBtns, tabFrames = {}, {}
 for i, tab in ipairs(TABS) do
     local b = Instance.new("TextButton")
-    b.Size = UDim2.new(1, -12, 0, 40)
-    b.Position = UDim2.new(0, 6, 0, 8 + (i - 1) * 46)
+    b.Size = UDim2.fromOffset(68, 28)
     b.BackgroundColor3 = C.btn
     b.BackgroundTransparency = 0.35
     b.BorderSizePixel = 0
     b.Text = tab.name
     b.TextColor3 = C.text
     b.Font = FONT_B
-    b.TextSize = 13
+    b.TextSize = 10
+    b.TextWrapped = true
     b.AutoButtonColor = false
     b.ZIndex = 4
-    b.Parent = sidebar
-    corner(b, 8)
+    b.Parent = tabBar
+    corner(b, 6)
     stroke(b, C.accent, 1)
     tabBtns[i] = b
 
@@ -602,7 +614,7 @@ for i, tab in ipairs(TABS) do
     f.Size = UDim2.fromScale(1, 1)
     f.BackgroundTransparency = 1
     f.Visible = (i == 1)
-    f.ZIndex = 3
+    f.ZIndex = 5
     f.Parent = content
     tabFrames[i] = f
     tab.build(f)
@@ -630,9 +642,9 @@ end
 do
     local dragging, dragStart, startPos = false, nil, nil
     local dragArea = Instance.new("Frame")
-    dragArea.Size = UDim2.new(1, 0, 0, 28)
+    dragArea.Size = UDim2.new(1, 0, 0, 30)
     dragArea.BackgroundTransparency = 1
-    dragArea.ZIndex = 5
+    dragArea.ZIndex = 7
     dragArea.Parent = win
 
     dragArea.InputBegan:Connect(function(input)
@@ -664,8 +676,9 @@ end
 
 --══════════════ TOGGLE ══════════════
 local toggle = Instance.new("ImageButton")
-toggle.Size = UDim2.fromOffset(60, 60)
-toggle.Position = UDim2.new(1, -90, 1, -90)
+toggle.Size = UDim2.fromOffset(50, 50)
+toggle.Position = UDim2.new(1, -70, 1, -80)
+toggle.AnchorPoint = Vector2.new(1, 1)
 toggle.BackgroundColor3 = C.panel
 toggle.BackgroundTransparency = 0.15
 toggle.Image = A.toggle
@@ -716,9 +729,9 @@ task.spawn(function()
     playIntro()
     toggle.Visible = true
     win.Visible = true
-    Notify("REDZ HUB", "v6.2 جاهز 🛡️", "success")
+    Notify("REDZ HUB", "v6.3 جاهز 🛡️", "success")
     task.wait(0.8)
     Notify("الأوامر", "12 أمر جاهز عبر infinite", "info")
 end)
 
-print("[REDZ HUB v6.2] Loaded.")
+print("[REDZ HUB v6.3] Loaded.")
